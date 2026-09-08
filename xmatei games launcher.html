@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Launcher Portal</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --admin: #10b981;
+            --download: #8b5cf6;
+            --lang: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .hidden { display: none !important; }
+
+        h2, h3, h4 { margin-top: 0; color: var(--text); }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            box-sizing: border-box;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus { border-color: var(--accent); }
+        textarea { resize: vertical; height: 80px; }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        button:hover { opacity: 0.9; }
+
+        .switch-text {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .switch-text span { color: var(--accent); text-decoration: underline; }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-small {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            background: var(--bg);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            margin-top: 0;
+        }
+
+        .lang-btn, .profile-btn {
+            width: auto;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            margin-top: 0;
+        }
+
+        .lang-btn { background: var(--lang); color: #000; }
+        .profile-btn { background: var(--accent); }
+
+        .upload-section, .community-section, .friends-section {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+            margin-bottom: 25px;
+        }
+        
+        .upload-section { border-color: var(--admin); }
+        .upload-section h3 { color: var(--admin); }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .game-card h4 { margin: 10px 0 5px 0; }
+        .game-card p { color: var(--muted); font-size: 0.8rem; margin: 0 0 10px 0; }
+        
+        .btn-download { background: var(--download); }
+        .btn-delete { background: var(--danger); }
+        .btn-success { background: var(--admin); }
+
+        .community-list, .friends-list-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .community-card, .friend-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .friend-card {
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .friend-card:hover { border-color: var(--accent); }
+
+        .community-card-left, .friend-card-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .community-logo, .friend-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            flex-shrink: 0;
+        }
+
+        .community-card-info h4, .friend-card-info h4 { margin: 0 0 2px 0; color: var(--accent); font-size: 0.95rem; }
+        .community-card-info p, .friend-card-info p { margin: 0; font-size: 0.75rem; color: var(--muted); }
+
+        .btn-sm {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            margin-top: 0;
+        }
+
+        .post-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .post-author {
+            font-weight: bold;
+            color: var(--accent);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .post-author-avatar {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border);
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            word-break: break-word;
+            margin: 0;
+        }
+
+        .post-media-container img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .post-file-link {
+            display: inline-block;
+            background: var(--bg);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .toolbar-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .emoji-btn, .gif-toggle-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            width: auto;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .gif-toggle-btn { background: var(--border); font-weight: 600; font-size: 0.75rem; }
+
+        .gif-picker-drawer {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .gif-thumb {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .gif-thumb:hover { border-color: var(--accent); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .admin-badge {
+            background: var(--admin);
+            color: #000;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- AUTH BOX -->
+        <div id="authBox">
+            <div style="position: absolute; top: 20px; right: 20px;">
+                <button class="lang-btn" id="langToggleAuth" onclick="toggleLanguage()">Français</button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="hidden">
+                <h2 data-i18n="regTitle">Create Account</h2>
+                <label data-i18n="userLabel">Username</label>
+                <input type="text" id="regUser" placeholder="Choose a username">
+                <label data-i18n="passLabel">Password</label>
+                <input type="password" id="regPass" placeholder="Choose a password">
+                <button onclick="register()" data-i18n="regBtn">Register</button>
+                <div class="switch-text" onclick="toggleAuth()"><span data-i18n="hasAccount">Already have an account?</span> <span data-i18n="loginLink">Login</span></div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <h2 data-i18n="loginTitle">Launcher Login</h2>
+                <label data-i18n="userLabel">Username</label>
+                <input type="text" id="logUser" placeholder="Enter your username">
+                <label data-i18n="passLabel">Password</label>
+                <input type="password" id="logPass" placeholder="Enter your password">
+                <button onclick="login()" data-i18n="loginBtn">Login</button>
+                <div class="switch-text" onclick="toggleAuth()"><span data-i18n="noAccount">Need an account?</span> <span data-i18n="regLink">Register</span></div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD BOX -->
+        <div id="dashboardBox" class="hidden">
+            <div class="dashboard-header">
+                <div class="header-user-info">
+                    <img id="headerUserAvatar" src="" class="user-avatar-small" alt="Avatar">
+                    <div>
+                        <h2 data-i18n="dashTitle" style="margin-bottom: 2px;">Game Dashboard</h2>
+                        <span id="welcomeUser" style="color: var(--muted); font-size: 0.9rem;"></span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="profile-btn" onclick="openMyProfileModal()" data-i18n="profileBtn">Profile 👤</button>
+                    <button class="lang-btn" id="langToggleDash" onclick="toggleLanguage()">Français</button>
+                    <button class="logout-btn" onclick="logout()" data-i18n="logoutBtn">Logout</button>
+                </div>
+            </div>
+
+            <!-- Upload Games Section (Admin Only) -->
+            <div class="upload-section hidden" id="uploadSection">
+                <h3 data-i18n="adminTitle">Admin Panel: Upload Game</h3>
+                <label data-i18n="gameTitleLabel">Game Title</label>
+                <input type="text" id="gameTitle" placeholder="e.g. My Cool Platformer">
+                <label data-i18n="gameFileLabel">Select Game File (.html, .zip, etc.)</label>
+                <input type="file" id="gameFile">
+                <button onclick="uploadGame()" style="background: var(--admin); color: #000;" data-i18n="uploadBtn">Add Game to Library</button>
+            </div>
+
+            <!-- Friends System Section -->
+            <div class="friends-section">
+                <h3 data-i18n="friendsSectionTitle">Friends Hub</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label data-i18n="addFriendLabel">Add a Friend</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="friendNameInput" data-i18n-placeholder="friendPlaceholder" placeholder="Username..." style="margin: 5px 0 0 0;">
+                        <button class="btn-sm" onclick="sendFriendRequest()" data-i18n="addFriendBtn" style="height: 42px; margin-top: 5px;">Add Friend</button>
+                    </div>
+                </div>
+
+                <div id="pendingRequestsContainer" class="hidden" style="margin-bottom: 15px;">
+                    <h4 style="font-size: 0.9rem; color: var(--lang);" data-i18n="pendingRequestsTitle">Pending Friend Requests</h4>
+                    <div id="pendingRequestsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <h4 style="margin-top: 15px;" data-i18n="yourFriendsList">Your Friends</h4>
+                <div class="friends-list-grid" id="friendsListContainer"></div>
+            </div>
+
+            <!-- Library View -->
+            <h3 data-i18n="libraryTitle">Game Library</h3>
+            <div class="games-grid" id="gamesGrid"></div>
+
+            <!-- Community Section -->
+            <div class="community-section">
+                <h3 data-i18n="communitySectionTitle">Communities</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label data-i18n="createCommLabel">Create a New Community</label>
+                    <input type="text" id="commNameInput" data-i18n-placeholder="commPlaceholder" placeholder="Community Name..." style="margin: 5px 0 10px 0;">
+                    
+                    <label data-i18n="commLogoLabel">Community Logo (Image)</label>
+                    <input type="file" id="commLogoFile" accept="image/*" style="margin: 5px 0 10px 0;">
+                    
+                    <button class="btn-sm" onclick="createCommunity()" data-i18n="createCommBtn">Create Community</button>
+                </div>
+
+                <h4 style="margin-top: 25px;" data-i18n="exploreComms">Explore Communities</h4>
+                <div class="community-list" id="communityList"></div>
+
+                <!-- Active Community View -->
+                <div id="activeCommunityView" class="hidden" style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img id="activeCommLogo" src="" alt="Logo" class="community-logo">
+                            <h4 id="currentCommunityTitle" style="margin: 0; color: var(--accent);"></h4>
+                        </div>
+                        <button class="btn-sm" onclick="closeCommunity()" data-i18n="backToCommsBtn" style="background: var(--border);">← Back</button>
+                    </div>
+
+                    <!-- Emojis & Preinstalled GIFs Toolbar -->
+                    <div class="toolbar-container">
+                        <button class="emoji-btn" onclick="insertEmoji('😀')">😀</button>
+                        <button class="emoji-btn" onclick="insertEmoji('😂')">😂</button>
+                        <button class="emoji-btn" onclick="insertEmoji('🔥')">🔥</button>
+                        <button class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+                        <button class="emoji-btn" onclick="insertEmoji('🎮')">🎮</button>
+                        <button class="emoji-btn" onclick="insertEmoji('❤️')">❤️</button>
+                        <button class="emoji-btn" onclick="insertEmoji('🚀')">🚀</button>
+                        <button class="gif-toggle-btn" onclick="toggleGifPicker()" data-i18n="gifPickerBtn">GIFs 🎬</button>
+                    </div>
+
+                    <!-- Preinstalled GIFs Drawer -->
+                    <div id="gifPickerDrawer" class="gif-picker-drawer hidden">
+                        <img src="https://media.giphy.com/media/3oKIPnAiaMCws8nOsE/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/l0HlRnAWXxn0MhOBK/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/artj92V8o75VPL7AeQ/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/10JhviFuU2gWD6/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/26u4cqiYI30juCOGY/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/5GoVL4DAbHCX9g6znY/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                        <img src="https://media.giphy.com/media/13HgwGsXF0aiGY/giphy.gif" class="gif-thumb" onclick="selectGif(this.src)">
+                    </div>
+
+                    <textarea id="commPostText" data-i18n-placeholder="postPlaceholder" placeholder="Write a message or paste GIF/Image link..."></textarea>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                        <div style="flex-grow: 1;">
+                            <label style="font-size: 0.8rem; color: var(--muted);" data-i18n="attachFileLabel">Attach File or Image:</label>
+                            <input type="file" id="commPostFile" style="margin: 2px 0 0 0; padding: 6px; font-size: 0.85rem;">
+                        </div>
+                    </div>
+
+                    <button onclick="createCommunityPost()" data-i18n="postBtn">Post Message</button>
+                    
+                    <div style="margin-top: 15px;" id="communityPostsContainer"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Container for Interactions (Profile / Direct Message) -->
+    <div id="modalContainer" class="hidden modal-overlay">
+        <div class="modal-card" id="modalContent"></div>
+    </div>
+
+    <script>
+        let currentLang = localStorage.getItem('appLang') || 'en';
+        let activeCommunityId = null;
+
+        const translations = {
+            en: {
+                regTitle: "Create Account",
+                loginTitle: "Launcher Login",
+                userLabel: "Username",
+                passLabel: "Password",
+                regBtn: "Register",
+                loginBtn: "Login",
+                hasAccount: "Already have an account?",
+                loginLink: "Login",
+                noAccount: "Need an account?",
+                regLink: "Register",
+                dashTitle: "Game Dashboard",
+                logoutBtn: "Logout",
+                adminTitle: "Admin Panel: Upload Game",
+                gameTitleLabel: "Game Title",
+                gameFileLabel: "Select Game File (.html, .zip, etc.)",
+                uploadBtn: "Add Game to Library",
+                libraryTitle: "Game Library",
+                launchBtn: "Launch",
+                downloadBtn: "Download",
+                deleteBtn: "Delete",
+                uploadedBy: "Uploaded by",
+                noGames: "No games available yet.",
+                friendsSectionTitle: "Friends Hub",
+                addFriendLabel: "Add a Friend",
+                friendPlaceholder: "Username...",
+                addFriendBtn: "Add Friend",
+                pendingRequestsTitle: "Pending Friend Requests",
+                yourFriendsList: "Your Friends",
+                noFriends: "No friends added yet.",
+                acceptBtn: "Accept",
+                rejectBtn: "Reject",
+                removeBtn: "Remove",
+                communitySectionTitle: "Community Hub",
+                createCommLabel: "Create a New Community",
+                commPlaceholder: "Community Name...",
+                commLogoLabel: "Community Logo (Image)",
+                createCommBtn: "Create Community",
+                exploreComms: "Explore Communities",
+                noComms: "No communities created yet. Create one above!",
+                backToCommsBtn: "Back to List",
+                postPlaceholder: "Write a message or select a GIF...",
+                attachFileLabel: "Attach File or Image:",
+                postBtn: "Post Message",
+                noPosts: "No posts in this community yet.",
+                deleteCommBtn: "Delete",
+                downloadFile: "Download File",
+                gifPickerBtn: "GIFs 🎬",
+                viewProfile: "View Profile",
+                sendMessage: "Send Message",
+                close: "Close",
+                profileTitle: "User Profile",
+                dmTitle: "Direct Message with",
+                typeMessage: "Type a message...",
+                send: "Send",
+                noMessages: "No messages yet.",
+                profileBtn: "Profile 👤",
+                changeAvatarLabel: "Change Account Icon (Avatar):",
+                saveAvatarBtn: "Save Icon"
+            },
+            fr: {
+                regTitle: "Créer un compte",
+                loginTitle: "Connexion du lanceur",
+                userLabel: "Nom d'utilisateur",
+                passLabel: "Mot de passe",
+                regBtn: "S'inscrire",
+                loginBtn: "Connexion",
+                hasAccount: "Déjà un compte ?",
+                loginLink: "Se connecter",
+                noAccount: "Besoin d'un compte ?",
+                regLink: "S'inscrire",
+                dashTitle: "Tableau de bord",
+                logoutBtn: "Déconnexion",
+                adminTitle: "Panneau Admin : Importer un jeu",
+                gameTitleLabel: "Titre du jeu",
+                gameFileLabel: "Sélectionner le fichier (.html, .zip, etc.)",
+                uploadBtn: "Ajouter à la bibliothèque",
+                libraryTitle: "Bibliothèque de jeux",
+                launchBtn: "Lancer",
+                downloadBtn: "Télécharger",
+                deleteBtn: "Supprimer",
+                uploadedBy: "Importé par",
+                noGames: "Aucun jeu disponible pour le moment.",
+                friendsSectionTitle: "Espace Amis",
+                addFriendLabel: "Ajouter un ami",
+                friendPlaceholder: "Nom d'utilisateur...",
+                addFriendBtn: "Ajouter",
+                pendingRequestsTitle: "Demandes d'amis en attente",
+                yourFriendsList: "Vos Amis",
+                noFriends: "Aucun ami pour le moment.",
+                acceptBtn: "Accepter",
+                rejectBtn: "Refuser",
+                removeBtn: "Retirer",
+                communitySectionTitle: "Espace Communautaire",
+                createCommLabel: "Créer une nouvelle communauté",
+                commPlaceholder: "Nom de la communauté...",
+                commLogoLabel: "Logo de la communauté (Image)",
+                createCommBtn: "Créer la communauté",
+                exploreComms: "Explorer les communautés",
+                noComms: "Aucune communauté pour le moment. Créez-en une !",
+                backToCommsBtn: "Retour à la liste",
+                postPlaceholder: "Écrire un message ou choisir un GIF...",
+                attachFileLabel: "Joindre un fichier ou image :",
+                postBtn: "Publier",
+                noPosts: "Aucune publication dans cette communauté.",
+                deleteCommBtn: "Supprimer",
+                downloadFile: "Télécharger le fichier",
+                gifPickerBtn: "GIFs 🎬",
+                viewProfile: "Voir le profil",
+                sendMessage: "Envoyer un message",
+                close: "Fermer",
+                profileTitle: "Profil de l'utilisateur",
+                dmTitle: "Message direct avec",
+                typeMessage: "Écrire un message...",
+                send: "Envoyer",
+                noMessages: "Aucun message pour le moment.",
+                profileBtn: "Profil 👤",
+                changeAvatarLabel: "Changer l'icône du compte (Avatar) :",
+                saveAvatarBtn: "Enregistrer l'icône"
+            }
+        };
+
+        function updateLanguage() {
+            const langBtnText = currentLang === 'en' ? 'Français' : 'English';
+            document.getElementById('langToggleAuth').innerText = langBtnText;
+            document.getElementById('langToggleDash').innerText = langBtnText;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.innerText = translations[currentLang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+
+            loadGames();
+            loadCommunities();
+            loadFriendsData();
+            if (activeCommunityId !== null) {
+                loadCommunityPosts();
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'fr' : 'en';
+            localStorage.setItem('appLang', currentLang);
+            updateLanguage();
+        }
+
+        window.onload = function() {
+            updateLanguage();
+            const activeUser = localStorage.getItem('activeUser');
+            if (activeUser) {
+                showDashboard(activeUser);
+            }
+        }
+
+        function toggleAuth() {
+            document.getElementById('registerForm').classList.toggle('hidden');
+            document.getElementById('loginForm').classList.toggle('hidden');
+        }
+
+        function register() {
+            const user = document.getElementById('regUser').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
+
+            if (!user || !pass) {
+                alert(currentLang === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.');
+                return;
+            }
+
+            if (user.toLowerCase() === 'xmatei') {
+                alert(currentLang === 'fr' ? 'Le nom "xmatei" est réservé à l\'admin.' : 'The username "xmatei" is reserved for the admin.');
+                return;
+            }
+
+            if (localStorage.getItem('user_' + user)) {
+                alert(currentLang === 'fr' ? 'Ce nom d\'utilisateur existe déjà !' : 'Username already exists!');
+                return;
+            }
+
+            localStorage.setItem('user_' + user, pass);
+            alert(currentLang === 'fr' ? 'Inscription réussie ! Veuillez vous connecter.' : 'Registration successful! Please log in.');
+            toggleAuth();
+        }
+
+        function login() {
+            const user = document.getElementById('logUser').value.trim();
+            const pass = document.getElementById('logPass').value.trim();
+
+            if (user === 'xmatei' && pass === '123') {
+                localStorage.setItem('activeUser', 'xmatei');
+                showDashboard('xmatei');
+                return;
+            }
+
+            const storedPass = localStorage.getItem('user_' + user);
+            if (storedPass && storedPass === pass) {
+                localStorage.setItem('activeUser', user);
+                showDashboard(user);
+            } else {
+                alert(currentLang === 'fr' ? 'Nom d\'utilisateur ou mot de passe invalide !' : 'Invalid username or password!');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('activeUser');
+            activeCommunityId = null;
+            document.getElementById('dashboardBox').classList.add('hidden');
+            document.getElementById('authBox').classList.remove('hidden');
+            document.getElementById('logUser').value = '';
+            document.getElementById('logPass').value = '';
+        }
+
+        function getUserAvatar(username) {
+            return localStorage.getItem('avatar_' + username) || 'https://api.iconify.design/lucide:user.svg?color=%2394a3b8';
+        }
+
+        function showDashboard(username) {
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('dashboardBox').classList.remove('hidden');
+            
+            const welcomeText = document.getElementById('welcomeUser');
+            document.getElementById('headerUserAvatar').src = getUserAvatar(username);
+
+            if (username === 'xmatei') {
+                welcomeText.innerHTML = `${currentLang === 'fr' ? 'Connecté en tant que' : 'Logged in as'}: ${username} <span class="admin-badge">ADMIN</span>`;
+                document.getElementById('uploadSection').classList.remove('hidden');
+            } else {
+                welcomeText.innerText = `${currentLang === 'fr' ? 'Connecté en tant que' : 'Logged in as'}: ${username}`;
+                document.getElementById('uploadSection').classList.add('hidden');
+            }
+
+            loadGames();
+            loadCommunities();
+            loadFriendsData();
+            closeCommunity();
+        }
+
+        /* Profile & Avatar Customization */
+        function openMyProfileModal() {
+            const activeUser = localStorage.getItem('activeUser');
+            const t = translations[currentLang];
+            const modal = document.getElementById('modalContainer');
+            const content = document.getElementById('modalContent');
+            const currentAvatar = getUserAvatar(activeUser);
+            const role = activeUser === 'xmatei' ? 'ADMIN' : 'User';
+
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="${currentAvatar}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); background: var(--bg);" alt="Avatar">
+                    <h3 style="color: var(--accent); margin: 8px 0 2px 0;">${activeUser}</h3>
+                    <p style="color: var(--muted); font-size: 0.8rem; margin: 0;">Role: ${role}</p>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 0.85rem; color: var(--muted);">${t.changeAvatarLabel}</label>
+                    <input type="file" id="newAvatarFile" accept="image/*" style="margin: 5px 0; font-size: 0.85rem; padding: 6px;">
+                    <button class="btn-sm" onclick="saveNewAvatar()" style="width: 100%; margin-top: 5px;" data-i18n="saveAvatarBtn">${t.saveAvatarBtn}</button>
+                </div>
+                <button onclick="closeModal()" style="background: var(--border);">${t.close}</button>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function saveNewAvatar() {
+            const activeUser = localStorage.getItem('activeUser');
+            const fileInput = document.getElementById('newAvatarFile');
+
+            if (fileInput.files.length === 0) {
+                alert(currentLang === 'fr' ? 'Veuillez sélectionner une image.' : 'Please select an image.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                localStorage.setItem('avatar_' + activeUser, e.target.result);
+                document.getElementById('headerUserAvatar').src = e.target.result;
+                closeModal();
+                loadFriendsData();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /* Friends System Implementation */
+        function getUserFriendsData(username) {
+            const data = localStorage.getItem('friends_' + username);
+            return data ? JSON.parse(data) : { friends: [], requests: [] };
+        }
+
+        function saveUserFriendsData(username, data) {
+            localStorage.setItem('friends_' + username, JSON.stringify(data));
+        }
+
+        function sendFriendRequest() {
+            const activeUser = localStorage.getItem('activeUser');
+            const targetInput = document.getElementById('friendNameInput');
+            const targetUser = targetInput.value.trim();
+
+            if (!targetUser) {
+                alert(currentLang === 'fr' ? 'Veuillez entrer un nom d\'utilisateur.' : 'Please enter a username.');
+                return;
+            }
+
+            if (targetUser === activeUser) {
+                alert(currentLang === 'fr' ? 'Vous ne pouvez pas vous ajouter vous-même !' : 'You cannot add yourself as a friend!');
+                return;
+            }
+
+            const exists = (targetUser === 'xmatei') || (localStorage.getItem('user_' + targetUser) !== null);
+            if (!exists) {
+                alert(currentLang === 'fr' ? 'Cet utilisateur n\'existe pas.' : 'This user does not exist.');
+                return;
+            }
+
+            let targetData = getUserFriendsData(targetUser);
+            let myData = getUserFriendsData(activeUser);
+
+            if (myData.friends.includes(targetUser)) {
+                alert(currentLang === 'fr' ? 'Vous êtes déjà amis !' : 'You are already friends!');
+                return;
+            }
+
+            if (targetData.requests.includes(activeUser)) {
+                alert(currentLang === 'fr' ? 'Demande déjà envoyée !' : 'Friend request already sent!');
+                return;
+            }
+
+            targetData.requests.push(activeUser);
+            saveUserFriendsData(targetUser, targetData);
+
+            targetInput.value = '';
+            alert(currentLang === 'fr' ? 'Demande d\'ami envoyée !' : 'Friend request sent!');
+        }
+
+        function loadFriendsData() {
+            const activeUser = localStorage.getItem('activeUser');
+            if (!activeUser) return;
+
+            const myData = getUserFriendsData(activeUser);
+            const t = translations[currentLang];
+
+            const pendingContainer = document.getElementById('pendingRequestsContainer');
+            const pendingList = document.getElementById('pendingRequestsList');
+            pendingList.innerHTML = '';
+
+            if (myData.requests.length > 0) {
+                pendingContainer.classList.remove('hidden');
+                myData.requests.forEach((reqUser) => {
+                    const reqItem = document.createElement('div');
+                    reqItem.style.display = 'flex';
+                    reqItem.style.justifyContent = 'space-between';
+                    reqItem.style.alignItems = 'center';
+                    reqItem.style.background = 'var(--card)';
+                    reqItem.style.padding = '8px 12px';
+                    reqItem.style.borderRadius = '6px';
+                    reqItem.style.border = '1px solid var(--border)';
+
+                    reqItem.innerHTML = `
+                        <span style="font-weight: 500;">${reqUser}</span>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn-sm btn-success" onclick="respondFriendRequest('${reqUser}', true)">${t.acceptBtn}</button>
+                            <button class="btn-sm btn-delete" onclick="respondFriendRequest('${reqUser}', false)">${t.rejectBtn}</button>
+                        </div>
+                    `;
+                    pendingList.appendChild(reqItem);
+                });
+            } else {
+                pendingContainer.classList.add('hidden');
+            }
+
+            const friendsListContainer = document.getElementById('friendsListContainer');
+            friendsListContainer.innerHTML = '';
+
+            if (myData.friends.length === 0) {
+                friendsListContainer.innerHTML = `<p style="color: var(--muted); grid-column: 1 / -1;">${t.noFriends}</p>`;
+                return;
+            }
+
+            myData.friends.forEach((friendName) => {
+                const card = document.createElement('div');
+                card.className = 'friend-card';
+                card.onclick = () => openFriendModal(friendName);
+                const friendAvatar = getUserAvatar(friendName);
+
+                card.innerHTML = `
+                    <div class="friend-card-left">
+                        <img src="${friendAvatar}" class="friend-avatar-small" alt="avatar">
+                        <div class="friend-card-info">
+                            <h4>${friendName}</h4>
+                            <p style="color: var(--admin);">Online</p>
+                        </div>
+                    </div>
+                    <button class="btn-delete btn-sm" onclick="event.stopPropagation(); removeFriend('${friendName}')">${t.removeBtn}</button>
+                `;
+                friendsListContainer.appendChild(card);
+            });
+        }
+
+        function respondFriendRequest(requesterUser, accept) {
+            const activeUser = localStorage.getItem('activeUser');
+            let myData = getUserFriendsData(activeUser);
+
+            myData.requests = myData.requests.filter(u => u !== requesterUser);
+
+            if (accept) {
+                if (!myData.friends.includes(requesterUser)) {
+                    myData.friends.push(requesterUser);
+                }
+
+                let requesterData = getUserFriendsData(requesterUser);
+                if (!requesterData.friends.includes(activeUser)) {
+                    requesterData.friends.push(activeUser);
+                }
+                saveUserFriendsData(requesterUser, requesterData);
+            }
+
+            saveUserFriendsData(activeUser, myData);
+            loadFriendsData();
+        }
+
+        function removeFriend(friendName) {
+            const activeUser = localStorage.getItem('activeUser');
+            let myData = getUserFriendsData(activeUser);
+            let friendData = getUserFriendsData(friendName);
+
+            myData.friends = myData.friends.filter(f => f !== friendName);
+            friendData.friends = friendData.friends.filter(f => f !== activeUser);
+
+            saveUserFriendsData(activeUser, myData);
+            saveUserFriendsData(friendName, friendData);
+            loadFriendsData();
+        }
+
+        /* Friend Profile & Direct Messaging Modal Features */
+        function openFriendModal(friendName) {
+            const t = translations[currentLang];
+            const modal = document.getElementById('modalContainer');
+            const content = document.getElementById('modalContent');
+            const friendAvatar = getUserAvatar(friendName);
+
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="${friendAvatar}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); background: var(--bg);" alt="Avatar">
+                    <h3 style="color: var(--accent); margin: 8px 0 2px 0;">${friendName}</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button onclick="openProfileView('${friendName}')">${t.viewProfile}</button>
+                    <button onclick="openDirectMessage('${friendName}')" style="background: var(--admin); color: #000;">${t.sendMessage}</button>
+                    <button onclick="closeModal()" style="background: var(--border);">${t.close}</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modalContainer').classList.add('hidden');
+        }
+
+        function openProfileView(username) {
+            const t = translations[currentLang];
+            const content = document.getElementById('modalContent');
+            const role = username === 'xmatei' ? 'ADMIN' : 'User';
+            const avatar = getUserAvatar(username);
+
+            content.innerHTML = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <img src="${avatar}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); background: var(--bg);" alt="Avatar">
+                    <h3 style="color: var(--accent); margin: 5px 0 0 0;">${t.profileTitle}</h3>
+                </div>
+                <div style="background: var(--bg); padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid var(--border);">
+                    <p style="margin: 0 0 8px 0;"><strong>${translations[currentLang].userLabel}:</strong> ${username}</p>
+                    <p style="margin: 0;"><strong>Role:</strong> ${role}</p>
+                </div>
+                <button onclick="openFriendModal('${username}')" style="background: var(--border);">← Back</button>
+            `;
+        }
+
+        function getDmKey(userA, userB) {
+            return 'dm_' + [userA, userB].sort().join('_');
+        }
+
+        function openDirectMessage(friendName) {
+            const activeUser = localStorage.getItem('activeUser');
+            const t = translations[currentLang];
+            const content = document.getElementById('modalContent');
+            const dmKey = getDmKey(activeUser, friendName);
+            const messages = JSON.parse(localStorage.getItem(dmKey) || '[]');
+
+            let msgsHtml = '';
+            if (messages.length === 0) {
+                msgsHtml = `<p style="color: var(--muted); text-align: center; margin: 20px 0;">${t.noMessages}</p>`;
+            } else {
+                messages.forEach(m => {
+                    msgsHtml += `<div style="margin-bottom: 8px;"><strong style="color: var(--accent);">${m.sender}:</strong> ${escapeHtml(m.text)}</div>`;
+                });
+            }
+
+            content.innerHTML = `
+                <h3 style="font-size: 1.1rem; margin-bottom: 10px;">${t.dmTitle} ${friendName}</h3>
+                <div id="dmChatBox" style="background: var(--bg); border: 1px solid var(--border); border-radius: 8px; height: 160px; overflow-y: auto; padding: 10px; margin-bottom: 10px; font-size: 0.9rem;">
+                    ${msgsHtml}
+                </div>
+                <input type="text" id="dmInput" placeholder="${t.typeMessage}" style="margin: 0 0 10px 0;" onkeydown="if(event.key==='Enter') sendDirectMessage('${friendName}')">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="sendDirectMessage('${friendName}')">${t.send}</button>
+                    <button onclick="openFriendModal('${friendName}')" style="background: var(--border);">${t.close}</button>
+                </div>
+            `;
+
+            const chatBox = document.getElementById('dmChatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendDirectMessage(friendName) {
+            const activeUser = localStorage.getItem('activeUser');
+            const input = document.getElementById('dmInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const dmKey = getDmKey(activeUser, friendName);
+            let messages = JSON.parse(localStorage.getItem(dmKey) || '[]');
+            messages.push({ sender: activeUser, text: text, time: Date.now() });
+            localStorage.setItem(dmKey, JSON.stringify(messages));
+
+            openDirectMessage(friendName);
+        }
+
+        /* Upload Games Section */
+        function uploadGame() {
+            const activeUser = localStorage.getItem('activeUser');
+            if (activeUser !== 'xmatei') return;
+
+            const title = document.getElementById('gameTitle').value.trim();
+            const fileInput = document.getElementById('gameFile');
+
+            if (!title || fileInput.files.length === 0) {
+                alert(currentLang === 'fr' ? 'Veuillez donner un titre et choisir un fichier.' : 'Please provide a title and select a game file.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const gameObj = {
+                    title: title,
+                    fileName: file.name,
+                    dataUrl: e.target.result,
+                    uploader: activeUser
+                };
+
+                let allGames = JSON.parse(localStorage.getItem('global_games') || '[]');
+                allGames.push(gameObj);
+                localStorage.setItem('global_games', JSON.stringify(allGames));
+
+                document.getElementById('gameTitle').value = '';
+                document.getElementById('gameFile').value = '';
+                loadGames();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadGames() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            const activeUser = localStorage.getItem('activeUser');
+            const allGames = JSON.parse(localStorage.getItem('global_games') || '[]');
+            const t = translations[currentLang];
+
+            if (allGames.length === 0) {
+                grid.innerHTML = `<p style="color: var(--muted); grid-column: 1 / -1;">${t.noGames}</p>`;
+                return;
+            }
+
+            allGames.forEach((game, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                
+                let actionButtons = `<button class="btn-download" onclick="downloadGame(${index})">${t.downloadBtn}</button>`;
+                if (activeUser === 'xmatei') {
+                    actionButtons = `
+                        <button onclick="launchGame(${index})">${t.launchBtn}</button>
+                        <button class="btn-download" onclick="downloadGame(${index})">${t.downloadBtn}</button>
+                        <button class="btn-delete" onclick="deleteGame(${index})">${t.deleteBtn}</button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <h4>${game.title}</h4>
+                        <p>${t.uploadedBy} ${game.uploader}</p>
+                    </div>
+                    <div>${actionButtons}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function launchGame(index) {
+            const allGames = JSON.parse(localStorage.getItem('global_games') || '[]');
+            const game = allGames[index];
+            if (game) {
+                const newWindow = window.open();
+                newWindow.document.write(`<!DOCTYPE html><html><head><title>${game.title}</title></head><body style="margin:0; background:#000;"><iframe src="${game.dataUrl}" style="width:100vw; height:100vh; border:none;"></iframe></body></html>`);
+            }
+        }
+
+        function downloadGame(index) {
+            const allGames = JSON.parse(localStorage.getItem('global_games') || '[]');
+            const game = allGames[index];
+            if (game) {
+                const a = document.createElement('a');
+                a.href = game.dataUrl;
+                a.download = game.fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+
+        function deleteGame(index) {
+            const activeUser = localStorage.getItem('activeUser');
+            if (activeUser !== 'xmatei') return;
+            if (confirm(currentLang === 'fr' ? 'Supprimer ce jeu ?' : 'Delete this game?')) {
+                let allGames = JSON.parse(localStorage.getItem('global_games') || '[]');
+                allGames.splice(index, 1);
+                localStorage.setItem('global_games', JSON.stringify(allGames));
+                loadGames();
+            }
+        }
+
+        /* Community Management Functions */
+        function createCommunity() {
+            const nameInput = document.getElementById('commNameInput');
+            const logoInput = document.getElementById('commLogoFile');
+            const name = nameInput.value.trim();
+            const activeUser = localStorage.getItem('activeUser');
+
+            if (!name) {
+                alert(currentLang === 'fr' ? 'Entrez un nom de communauté.' : 'Enter a community name.');
+                return;
+            }
+
+            if (logoInput.files.length === 0) {
+                alert(currentLang === 'fr' ? 'Veuillez sélectionner un logo pour la communauté.' : 'Please select a logo image for the community.');
+                return;
+            }
+
+            const file = logoInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const logoDataUrl = e.target.result;
+                let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+                
+                const newComm = {
+                    id: Date.now().toString(),
+                    name: name,
+                    logo: logoDataUrl,
+                    creator: activeUser,
+                    posts: []
+                };
+
+                communities.push(newComm);
+                localStorage.setItem('global_communities', JSON.stringify(communities));
+                
+                nameInput.value = '';
+                logoInput.value = '';
+                loadCommunities();
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function loadCommunities() {
+            const listContainer = document.getElementById('communityList');
+            listContainer.innerHTML = '';
+
+            let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+            const activeUser = localStorage.getItem('activeUser');
+            const t = translations[currentLang];
+
+            if (communities.length === 0) {
+                listContainer.innerHTML = `<p style="color: var(--muted); grid-column: 1 / -1;">${t.noComms}</p>`;
+                return;
+            }
+
+            communities.forEach((comm) => {
+                const card = document.createElement('div');
+                card.className = 'community-card';
+
+                let deleteBtnHtml = '';
+                if (activeUser === 'xmatei') {
+                    deleteBtnHtml = `<button class="btn-delete btn-sm" onclick="deleteCommunity('${comm.id}')">${t.deleteCommBtn}</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="community-card-left" onclick="openCommunity('${comm.id}')">
+                        <img src="${comm.logo}" class="community-logo" alt="logo">
+                        <div class="community-card-info">
+                            <h4>${escapeHtml(comm.name)}</h4>
+                            <p>${t.uploadedBy} ${comm.creator}</p>
+                        </div>
+                    </div>
+                    ${deleteBtnHtml}
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function deleteCommunity(commId) {
+            const activeUser = localStorage.getItem('activeUser');
+            if (activeUser !== 'xmatei') return;
+
+            if (confirm(currentLang === 'fr' ? 'Supprimer cette communauté ?' : 'Delete this community?')) {
+                let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+                communities = communities.filter(c => c.id !== commId);
+                localStorage.setItem('global_communities', JSON.stringify(communities));
+                
+                if (activeCommunityId === commId) {
+                    closeCommunity();
+                }
+                loadCommunities();
+            }
+        }
+
+        function openCommunity(commId) {
+            activeCommunityId = commId;
+            let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+            const comm = communities.find(c => c.id === commId);
+
+            if (comm) {
+                document.getElementById('currentCommunityTitle').innerText = comm.name;
+                document.getElementById('activeCommLogo').src = comm.logo;
+                document.getElementById('activeCommunityView').classList.remove('hidden');
+                loadCommunityPosts();
+            }
+        }
+
+        function closeCommunity() {
+            activeCommunityId = null;
+            document.getElementById('activeCommunityView').classList.add('hidden');
+        }
+
+        function insertEmoji(emoji) {
+            const textarea = document.getElementById('commPostText');
+            textarea.value += emoji;
+            textarea.focus();
+        }
+
+        function toggleGifPicker() {
+            const drawer = document.getElementById('gifPickerDrawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function selectGif(gifUrl) {
+            const textarea = document.getElementById('commPostText');
+            textarea.value += (textarea.value ? " " : "") + gifUrl;
+            document.getElementById('gifPickerDrawer').classList.add('hidden');
+            textarea.focus();
+        }
+
+        function createCommunityPost() {
+            if (!activeCommunityId) return;
+
+            const textInput = document.getElementById('commPostText');
+            const fileInput = document.getElementById('commPostFile');
+            const content = textInput.value.trim();
+            const activeUser = localStorage.getItem('activeUser');
+
+            let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+            const commIndex = communities.findIndex(c => c.id === activeCommunityId);
+
+            if (commIndex === -1) return;
+
+            if (!content && fileInput.files.length === 0) return;
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    savePostToCommunity(communities, commIndex, activeUser, content, {
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result
+                    });
+                };
+                reader.readAsDataURL(file);
+            } else {
+                savePostToCommunity(communities, commIndex, activeUser, content, null);
+            }
+        }
+
+        function savePostToCommunity(communities, commIndex, author, content, fileObj) {
+            const postObj = {
+                author: author,
+                content: content,
+                file: fileObj,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+
+            communities[commIndex].posts.unshift(postObj);
+            localStorage.setItem('global_communities', JSON.stringify(communities));
+
+            document.getElementById('commPostText').value = '';
+            document.getElementById('commPostFile').value = '';
+            loadCommunityPosts();
+        }
+
+        function loadCommunityPosts() {
+            const container = document.getElementById('communityPostsContainer');
+            container.innerHTML = '';
+
+            let communities = JSON.parse(localStorage.getItem('global_communities') || '[]');
+            const comm = communities.find(c => c.id === activeCommunityId);
+            const t = translations[currentLang];
+
+            if (!comm || comm.posts.length === 0) {
+                container.innerHTML = `<p style="color: var(--muted);">${t.noPosts}</p>`;
+                return;
+            }
+
+            comm.posts.forEach((post) => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+
+                let formattedContent = escapeHtml(post.content);
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                formattedContent = formattedContent.replace(urlRegex, (url) => {
+                    if (url.match(/\.(jpeg|jpg|gif|png)(\?.*)?$/i) || url.includes('giphy.com') || url.includes('tenor.com')) {
+                        return `<br><img src="${url}" style="max-width:100%; max-height:220px; border-radius:6px; margin-top:5px;" alt="GIF/Image">`;
+                    }
+                    return `<a href="${url}" target="_blank" style="color: var(--accent);">${url}</a>`;
+                });
+
+                let mediaHtml = '';
+                if (post.file) {
+                    if (post.file.type.startsWith('image/')) {
+                        mediaHtml = `<div class="post-media-container"><img src="${post.file.url}" alt="Uploaded image"></div>`;
+                    } else {
+                        mediaHtml = `<a class="post-file-link" href="${post.file.url}" download="${post.file.name}">📎 ${post.file.name} (${t.downloadFile})</a>`;
+                    }
+                }
+
+                const authorAvatar = getUserAvatar(post.author);
+
+                postCard.innerHTML = `
+                    <div>
+                        <div class="post-author">
+                            <img src="${authorAvatar}" class="post-author-avatar" alt="Avatar">
+                            <span>${post.author}</span>
+                            <span style="font-weight: normal; color: var(--muted); font-size: 0.8rem;">(${post.date})</span>
+                        </div>
+                        <p class="post-content">${formattedContent}</p>
+                        ${mediaHtml}
+                    </div>
+                `;
+                container.appendChild(postCard);
+            });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+</body>
+</html>
